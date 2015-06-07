@@ -1,4 +1,4 @@
-angular.module('location', ['ionic', 'location.controllers','logglyLogger','ngCordova'])
+angular.module('location', ['ionic', 'location.controllers','location.services','logglyLogger','ngCordova','uiGmapgoogle-maps'])
 
 .run(function($ionicPlatform,$cordovaGeolocation,$log) {
   $ionicPlatform.ready(function() {
@@ -16,6 +16,16 @@ angular.module('location', ['ionic', 'location.controllers','logglyLogger','ngCo
     abstract: true,
     templateUrl: "templates/menu.html",
     controller: 'AppCtrl'
+  })
+  
+  .state('app.map', {
+    url: "/map",
+    views: {
+      'menuContent': {
+        templateUrl: "templates/map.html",
+        controller:'MapCtrl'
+      }
+    }
   })
 
   .state('app.location', {
