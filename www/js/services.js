@@ -5,7 +5,8 @@ angular.module('location.services', [])
 })
 .factory('Map',['$rootScope','$log','$q',function($rootScope,$log,$q){
   var map = null;
-  var marker = null;
+  var markers = [];
+  var currentPositionMarker = null;
   return {
     map:map,
     initialize:function(options){
@@ -25,14 +26,20 @@ angular.module('location.services', [])
             var listener = options.listeners[i];
             google.maps.event.addListener(map,listener.eventName,listener.listener);
           }
-    },
-    setMarker:function(options){
-        if(marker == null){
-          marker = new google.maps.Marker({
-            position: options.location, 
-            map: map
-          });
           
+          //setup current position marker
+          currentPositionMarker = new google.maps.Marker({
+            position: myLatlng, 
+            map: map,
+            icon:"http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|3a5795"
+         });
+    },
+    placeMarker:function(options){
+         var marker = new google.maps.Marker({
+            position: options.location, 
+            map: map,
+            icon:"http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + options.color
+         });
                   // Add circle overlay and bind to marker
           var circle = new google.maps.Circle({
               map: map,
@@ -45,10 +52,22 @@ angular.module('location.services', [])
           });
   
           circle.bindTo('center', marker, 'position');
-        }
+          
+          markers.push(marker);
     },
-    clearMarker:function(){
-      marker = null;
+    clearMarkers:function(){
+      for(var i in markers){
+        var marker = markers[i];
+        marker.setMap(null);
+        marker = null;
+        markers.splice(i);
+      }
+    },
+    updateCurrentPosition:function(position){
+      if(currentPositionMarker != null){    
+        	var updatedPosition = new google.maps.LatLng(position.latitude,position.longitude);
+          currentPositionMarker.setPosition(updatedPosition);
+      }
     }
   };
 }])
@@ -64,11 +83,6 @@ angular.module('location.services', [])
           d.reject(err);
         });
         return d.promise;
-    },
-    watchPosition: function(options){
-      var d = $q.defer();
-      var watch = $cordovaGeolocation.watchPosition(options);
-      d.resolve(watch);
-      return d.promise;
-   }};
+    }
+  };
 }]);
